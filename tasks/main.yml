@@ -1,20 +1,20 @@
 ---
 
-- block:
-    - when: wallabag_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - when: wallabag_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+- name: Validate and install Wallabag if enabled
+  when: wallabag_enabled | bool
   tags:
     - setup-all
     - setup-wallabag
     - install-all
     - install-wallabag
+  block:
+    - ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- block:
-    - when: not wallabag_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+- name: Uninstall Wallabag if not enabled
+  when: not wallabag_enabled | bool
   tags:
     - setup-all
     - setup-wallabag
+  block:
+    - ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"

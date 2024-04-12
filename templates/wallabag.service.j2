@@ -1,5 +1,5 @@
 [Unit]
-Description=wallabag readlater Server ({{ wallabag_identifier }})
+Description=wallabag save websites to read them later ({{ wallabag_identifier }})
 {% for service in wallabag_systemd_required_services_list %}
 Requires={{ service }}
 After={{ service }}
