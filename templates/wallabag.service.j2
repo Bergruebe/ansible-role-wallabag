@@ -1,0 +1,47 @@
+[Unit]
+Description=wallabag readlater Server ({{ wallabag_identifier }})
+{% for service in wallabag_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+{% for service in wallabag_systemd_wanted_services_list %}
+Wants={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ wallabag_identifier }} 2>/dev/null || true'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ wallabag_identifier }} 2>/dev/null || true'
+
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
+                --rm \
+                --name={{ wallabag_identifier }} \
+                --log-driver=none \
+                --user={{ wallabag_uid }}:{{ wallabag_gid }} \
+                --cap-drop=ALL \
+                {% if wallabag_container_http_host_bind_port %}
+                -p {{ wallabag_container_http_host_bind_port }}:{{ wallabag_container_http_port }} \
+                {% endif %}
+                --label-file={{ wallabag_config_path }}/labels \
+                --network={{ wallabag_container_network }} \
+                --mount type=bind,src={{ wallabag_data_path }},dst=/wallabag/storage \
+                --read-only \
+                --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
+                --env-file={{ wallabag_env_path }} \
+                {{ wallabag_container_image }}
+
+{% for network in wallabag_container_additional_networks %}
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ wallabag_identifier }}
+{% endfor %}
+
+ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ wallabag_identifier }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ wallabag_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ wallabag_identifier }} 2>/dev/null || true'
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ wallabag_identifier }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,57 @@
+---
+
+- name: Ensure wallabag network is created in Docker
+  community.docker.docker_network:
+    name: "{{ wallabag_container_network }}"
+    driver: bridge
+
+
+- name: Ensure wallabag path exists
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0700
+    owner: "{{ wallabag_uid }}"
+    group: "{{ wallabag_gid }}"
+  with_items:
+    - {path: "{{ wallabag_base_path }}", when: true}
+    - {path: "{{ wallabag_config_path }}", when: true}
+
+- name: Ensure wallabag data and images path exists
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0755
+    owner: "{{ wallabag_uid }}"
+    group: "{{ wallabag_gid }}"
+  with_items:
+    - {path: "{{ wallabag_data_path }}", when: true}
+    - {path: "{{wallabag_images_path }}", when: true}
+
+
+- name: Ensure wallabag traefik labels are installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/labels.j2"
+    dest: "{{ wallabag_config_path }}/labels"
+    owner: "{{ wallabag_uid }}"
+    group: "{{ wallabag_gid }}"
+    mode: 0640
+
+- name: Ensure wallabag configuration is deployed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/env.j2"
+    dest: "{{ wallabag_config_path }}/env"
+    owner: "{{ wallabag_uid }}"
+    group: "{{ wallabag_gid }}"
+    mode: 0640
+
+- name: Ensure wallabag container image is pulled
+  community.docker.docker_image:
+    name: "{{ wallabag_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+
+- name: Ensure wallabag.service installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/wallabag.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ wallabag_identifier }}.service"
+    mode: 0644

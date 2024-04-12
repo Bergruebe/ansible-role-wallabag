@@ -1,0 +1,39 @@
+{% if wallabag_container_labels_traefik_enabled %}
+{% if wallabag_container_labels_traefik_docker_network %}
+traefik.docker.network={{ wallabag_container_labels_traefik_docker_network }}
+{% endif %}
+
+{% set middlewares = [] %}
+
+{% if wallabag_container_labels_traefik_additional_request_headers.keys() | length > 0 %}
+{% for name, value in wallabag_container_labels_traefik_additional_request_headers.items() %}
+traefik.http.middlewares.{{ wallabag_identifier }}-add-request-headers.headers.customrequestheaders.{{ name }}={{ value }}
+{% endfor %}
+{% set middlewares = middlewares + [wallabag_identifier + '-add-request-headers'] %}
+{% endif %}
+
+{% if wallabag_container_labels_traefik_additional_response_headers.keys() | length > 0 %}
+{% for name, value in wallabag_container_labels_traefik_additional_response_headers.items() %}
+traefik.http.middlewares.{{ wallabag_identifier }}-add-response-headers.headers.customresponseheaders.{{ name }}={{ value }}
+{% endfor %}
+{% set middlewares = middlewares + [wallabag_identifier + '-add-response-headers'] %}
+{% endif %}
+
+traefik.enable=true
+{% endif %}
+traefik.http.routers.{{ wallabag_identifier }}.rule=Host("{{ wallabag_hostname }}")
+{% if wallabag_container_labels_traefik_priority | int > 0 %}
+traefik.http.routers.{{ wallabag_identifier }}.priority={{ wallabag_container_labels_traefik_priority }}
+{% endif %}
+{% if middlewares | length > 0 %}
+traefik.http.routers.{{ wallabag_identifier }}.middlewares={{ middlewares | join(',') }}
+{% endif %}
+traefik.http.routers.{{ wallabag_identifier }}.service={{ wallabag_identifier }}
+traefik.http.routers.{{ wallabag_identifier }}.entrypoints={{ wallabag_container_labels_traefik_entrypoints }}
+traefik.http.routers.{{ wallabag_identifier }}.tls={{ wallabag_container_labels_traefik_tls | to_json }}
+{% if wallabag_container_labels_traefik_tls %}
+traefik.http.routers.{{ wallabag_identifier }}.tls.certResolver={{ wallabag_container_labels_traefik_tls_certResolver }}
+{% endif %}
+traefik.http.services.{{ wallabag_identifier }}.loadbalancer.server.port={{ wallabag_container_http_port }}
+
+{{ wallabag_container_labels_additional_labels }}

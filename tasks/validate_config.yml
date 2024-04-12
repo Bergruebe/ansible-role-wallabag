@@ -1,0 +1,22 @@
+---
+
+- name: Fail if required wallabag settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) for using this role.
+  when: "vars[item] == ''"
+  with_items:
+    - wallabag_hostname
+    - wallabag_database_hostname
+    - wallabag_database_password
+    - wallabag_secret
+    - wallabag_uid
+    - wallabag_gid
+
+- name: Fail when SMTP settings are missing (and SMTP is enabled by setting host)
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) to correctly set up email via SMTP.
+  when: "wallabag_mailer_dsn !='' and vars[item] == ''"
+  with_items:
+    - wallabag_smtp_from

@@ -1,0 +1,197 @@
+---
+
+wallabag_enabled: true
+wallabag_identifier: wallabag
+
+wallabag_hostname: ''
+
+
+
+wallabag_uid: ''
+wallabag_gid: ''
+
+wallabag_base_path: "/{{ wallabag_identifier }}"
+wallabag_config_path: "{{ wallabag_base_path }}/config"
+wallabag_data_path: "{{ wallabag_base_path }}/data"
+wallabag_images_path: "{{ wallabag_base_path }}/images"
+wallabag_env_path: "{{ wallabag_config_path }}/env"
+
+wallabag_systemd_required_services_list: "{{ wallabag_systemd_required_services_list_default + wallabag_systemd_required_services_list_auto + wallabag_systemd_required_services_list_custom }}"
+wallabag_systemd_required_services_list_default: ['docker.service']
+wallabag_systemd_required_services_list_auto: []
+wallabag_systemd_required_services_list_custom: []
+
+wallabag_systemd_wanted_services_list: "{{ wallabag_systemd_wanted_services_list_default + wallabag_systemd_wanted_services_list_auto + wallabag_systemd_wanted_services_list_custom }}"
+wallabag_systemd_wanted_services_list_default: []
+wallabag_systemd_wanted_services_list_auto: []
+wallabag_systemd_wanted_services_list_custom: []
+
+wallabag_version: 2.6.8
+
+wallabag_container_image: "{{ wallabag_container_image_registry_prefix }}wallabag/wallabag:{{ wallabag_container_image_tag }}"
+wallabag_container_image_registry_prefix: docker.io/
+wallabag_container_image_tag: "{{ wallabag_version }}"
+wallabag_container_image_force_pull: "{{ wallabag_container_image.endswith(':latest') }}"
+
+wallabag_container_network: '{{ wallabag_identifier }}'
+
+
+# Controls whether the wallabag container exposes its HTTP port (as defined by `wallabag_container_http_port`).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8731"), or empty string to not expose.
+wallabag_container_http_host_bind_port: ""
+
+# A list of additional container networks that the container would be connected to.
+# The role does not create these networks, so make sure they already exist.
+# Use this to expose this container to a reverse proxy, which runs in a different container network.
+wallabag_container_additional_networks: "{{ wallabag_container_additional_networks_auto + wallabag_container_additional_networks_custom }}"
+wallabag_container_additional_networks_auto: []
+wallabag_container_additional_networks_custom: []
+
+wallabag_database_driver: 'pdo_sqlite'
+wallabag_database_hostname: ''
+wallabag_database_port: 5432
+wallabag_database_name: wallabag
+wallabag_database_username: wallabag
+wallabag_database_password: ''
+wallabag_database_charset: 'utf8'
+wallabag_database_table_prefix: 'wallabag_'
+
+wallabag_locale: 'en'
+
+# Put something random in here
+wallabag_secret: ''
+
+# See configuration in official documentation
+# https://doc.wallabag.org/en/admin/mailer
+wallabag_mailer_dsn: ''
+wallabag_from_email: 'wallabag@example.com'
+
+# defaults to "no-reply@wallabag.org", the address wallabag uses for two-factor emails
+wallabag_twofactor_sender: 'no-reply@wallabag.org'
+
+# enable or disable public user registration
+wallabag_registration: 'false'
+
+# enable or disable registration confirmation
+wallabag_confirmation: 'true'
+
+# Redis settings
+# protocol to use to communicate with the target server (tcp, unix, or http)
+wallabag_redis_scheme: 'tcp'
+wallabag_redis_host: 'redis'
+wallabag_redis_port: '6379'
+# path of the unix socket file
+wallabag_redis_path: ''
+wallabag_redis_password: ''
+
+wallabag_sentry_dsn: ''
+
+# Will set GTS_TRUSTED_PROXIES
+# By default this is set to all private IPs (https://datatracker.ietf.org/doc/html/rfc1918#section-3)
+wallabag_trusted_proxies: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+
+# Additional environment variables to pass to the wallabag container.
+# You can use this to further influence the default configuration.
+#
+# Example:
+# wallabag_environment_variables_extension: |
+#   wallabag_STORAGE_BACKEND=s3
+#   wallabag_STORAGE_S3_ENDPOINT=minio:9000
+#   wallabag_STORAGE_S3_BUCKET=something
+#   wallabag_STORAGE_S3_SECRET_KEY=verysecret
+wallabag_environment_variables_extension: ''
+
+# wallabag_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `roles/custom/wallabag_wallabag/templates/labels.j2` for details.
+#
+# To inject your own other container labels, see `wallabag_container_labels_additional_labels`.
+wallabag_container_labels_traefik_enabled: false
+wallabag_container_labels_traefik_docker_network: ""
+wallabag_container_labels_traefik_entrypoints: web-secure
+wallabag_container_labels_traefik_priority: 0
+wallabag_container_labels_traefik_tls: "{{ wallabag_container_labels_traefik_entrypoints != 'web' }}"
+wallabag_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# Controls which additional headers to attach to all HTTP requests.
+# To add your own custom request headers, use `wallabag_container_labels_traefik_additional_response_headers_custom`
+wallabag_container_labels_traefik_additional_request_headers: "{{ wallabag_container_labels_traefik_additional_request_headers_auto | combine(wallabag_container_labels_traefik_additional_request_headers_custom) }}"
+wallabag_container_labels_traefik_additional_request_headers_auto: {}
+wallabag_container_labels_traefik_additional_request_headers_custom: {}
+
+
+# Controls which additional headers to attach to all HTTP responses.
+# To add your own custom response headers, use `wallabag_container_labels_traefik_additional_response_headers_custom`
+wallabag_container_labels_traefik_additional_response_headers: "{{ wallabag_container_labels_traefik_additional_response_headers_auto | combine(wallabag_container_labels_traefik_additional_response_headers_custom) }}"
+wallabag_container_labels_traefik_additional_response_headers_auto: |
+  {{
+    {}
+    | combine ({'X-XSS-Protection': wallabag_http_header_xss_protection} if wallabag_http_header_xss_protection else {})
+    | combine ({'X-Frame-Options': wallabag_http_header_frame_options} if wallabag_http_header_frame_options else {})
+    | combine ({'X-Content-Type-Options': wallabag_http_header_content_type_options} if wallabag_http_header_content_type_options else {})
+    | combine ({'Content-Security-Policy': wallabag_http_header_content_security_policy} if wallabag_http_header_content_security_policy else {})
+    | combine ({'Permission-Policy': wallabag_http_header_content_permission_policy} if wallabag_http_header_content_permission_policy else {})
+    | combine ({'Strict-Transport-Security': wallabag_http_header_strict_transport_security} if wallabag_http_header_strict_transport_security and wallabag_container_labels_traefik_tls else {})
+  }}
+wallabag_container_labels_traefik_additional_response_headers_custom: {}
+
+# Specifies the value of the `X-XSS-Protection` header
+# Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
+#
+# Learn more about it is here:
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+# - https://portswigger.net/web-security/cross-site-scripting/reflected
+wallabag_http_header_xss_protection: "1; mode=block"
+
+# Specifies the value of the `X-Frame-Options` header which controls whether framing can happen.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+wallabag_http_header_frame_options: SAMEORIGIN
+
+# Specifies the value of the `X-Content-Type-Options` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+wallabag_http_header_content_type_options: nosniff
+
+# Specifies the value of the `Content-Security-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+wallabag_http_header_content_security_policy: frame-ancestors 'self'
+
+# Specifies the value of the `Permission-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
+wallabag_http_header_content_permission_policy: "{{ 'interest-cohort=()' if wallabag_floc_optout_enabled else '' }}"
+
+# Specifies the value of the `Strict-Transport-Security` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+wallabag_http_header_strict_transport_security: "max-age=31536000; includeSubDomains{{ '; preload' if wallabag_hsts_preload_enabled else '' }}"
+
+# Controls whether to send a "Permissions-Policy interest-cohort=();" header along with all responses
+#
+# Learn more about what it is here:
+# - https://www.eff.org/deeplinks/2021/03/googles-floc-terrible-idea
+# - https://paramdeo.com/blog/opting-your-website-out-of-googles-floc-network
+# - https://amifloced.org/
+#
+# Of course, a better solution is to just stop using browsers (like Chrome), which participate in such tracking practices.
+# See: `wallabag_content_permission_policy`
+wallabag_floc_optout_enabled: true
+
+# Controls if HSTS preloading is enabled
+#
+# In its strongest and recommended form, the [HSTS policy](https://www.chromium.org/hsts) includes all subdomains, and
+# indicates a willingness to be "preloaded" into browsers:
+# `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+# For more information visit:
+# - https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+# - https://hstspreload.org/#opt-in
+# See: `wallabag_http_header_strict_transport_security`
+wallabag_hsts_preload_enabled: false
+
+
+# wallabag_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `roles/custom/collabora_online/templates/labels.j2` for details.
+#
+# Example:
+# wallabag_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+wallabag_container_labels_additional_labels: ''
