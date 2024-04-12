@@ -1,8 +1,6 @@
 # https://ansible.readthedocs.io/projects/lint/installing/#installing-ansible-lint-as-a-github-action
 name: ansible-lint
-on:
-  pull_request:
-    branches: ["stable", "release/v*"]
+on: [push, pull_request]
 jobs:
   build:
     name: Ansible Lint # Naming the build is important to use it as a status check
