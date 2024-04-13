@@ -1,4 +1,4 @@
 galaxy_info:
   role_name: wallabag
-  author: Bergrübe
+  author: Bergruebe
   description: Ansible role to install and configure Wallabag
