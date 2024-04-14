@@ -3,3 +3,5 @@ galaxy_info:
   author: Bergruebe
   namespace: bergruebe
   description: Ansible role to install and configure Wallabag
+  license: AGPL-3.0-or-later
+  min_ansible_version: '2.1'
