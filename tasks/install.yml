@@ -16,6 +16,7 @@
   with_items:
     - {path: "{{ wallabag_base_path }}", when: true}
     - {path: "{{ wallabag_config_path }}", when: true}
+    - {path: "{{ wallabag_config_path }}/etc/wallabag", when: true}
 
 - name: Ensure wallabag data and images path exists
   ansible.builtin.file:
@@ -26,7 +27,6 @@
     group: "{{ wallabag_gid }}"
   with_items:
     - {path: "{{ wallabag_data_path }}", when: true}
-    - {path: "{{ wallabag_images_path }}", when: true}
 
 
 - name: Ensure wallabag traefik labels are installed
@@ -52,6 +52,6 @@
 
 - name: Ensure wallabag.service installed
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/systemd/wallabag.service.j2"
+    src: "{{ role_path }}/templates/wallabag.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ wallabag_identifier }}.service"
     mode: "0644"

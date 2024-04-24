@@ -25,7 +25,8 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 {% endif %}
                 --label-file={{ wallabag_config_path }}/labels \
                 --network={{ wallabag_container_network }} \
-                --mount type=bind,src={{ wallabag_data_path }},dst=/wallabag/storage \
+                --mount type=bind,src={{ wallabag_data_path }},dst=/var/www/wallabag \
+                --mount type=bind,src={{ wallabag_config_path }}/etc/wallabag,dst=/etc/wallabag \
                 --read-only \
                 --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
                 --env-file={{ wallabag_env_path }} \
