@@ -4,6 +4,7 @@ wallabag_enabled: true
 wallabag_identifier: wallabag
 
 wallabag_hostname: ''
+wallabag_server_name: "Your wallabag instance"
 
 
 wallabag_uid: ''
@@ -25,7 +26,7 @@ wallabag_systemd_wanted_services_list_default: []
 wallabag_systemd_wanted_services_list_auto: []
 wallabag_systemd_wanted_services_list_custom: []
 
-wallabag_version: 2.6.8
+wallabag_version: 2.6.9
 
 wallabag_container_image: "{{ wallabag_container_image_registry_prefix }}wallabag/wallabag:{{ wallabag_container_image_tag }}"
 wallabag_container_image_registry_prefix: docker.io/
@@ -34,6 +35,7 @@ wallabag_container_image_force_pull: "{{ wallabag_container_image.endswith(':lat
 
 wallabag_container_network: '{{ wallabag_identifier }}'
 
+wallabag_container_http_port: 80
 
 # Controls whether the wallabag container exposes its HTTP port (as defined by `wallabag_container_http_port`).
 #
@@ -55,6 +57,7 @@ wallabag_database_username: wallabag
 wallabag_database_password: ''
 wallabag_database_charset: 'utf8'
 wallabag_database_table_prefix: 'wallabag_'
+wallabag_populate_database: 'True'
 
 wallabag_locale: 'en'
 
