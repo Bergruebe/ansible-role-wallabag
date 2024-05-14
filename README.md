@@ -1,3 +1,8 @@
+# THIS ROLE DOSE NOT WORK!
+I don't get the docker container running. I'm not sure if it is a permission error, or due to the fact, that I bind /etc to /mash/wallabag/config/etc because the container needs to write config files there.
+
+If somebody has an idea, I'm happy to accept a PR and to reopen this PR! 😀
+
 # Ansible Role for Wallabag
 
 This role is created for the [MASH playbook](https://github.com/mother-of-all-self-hosting/mash-playbook). It is inspired by the following projects:
